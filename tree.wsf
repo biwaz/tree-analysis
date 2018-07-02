@@ -1,0 +1,95 @@
+<job id="tree">
+<comment>tree analysis program</comment>
+<script language="VBScript" src="tree.vbs"/>
+<script language="VBScript">
+option explicit
+
+sub create_data(dest, depth, capacity)
+	dim i, n, m
+
+	n = 0
+	m = 1
+	for i = 1 to depth
+		m = m * capacity
+		n = n + m
+	next
+
+	dim temp()
+	redim temp(n)
+	randomize
+
+	m = 0
+	for i = 0 to ubound(temp)
+		m = m + int(rnd * 3) + 1
+		temp(i) = m
+	next
+
+	for i = 0 to ubound(temp)	' １次シャッフル
+		m = int(rnd * (ubound(temp) + 1))
+		n = temp(i)
+		temp(i) = temp(m)
+		temp(m) = n
+	next
+
+	dim subary(1)
+	redim dest(ubound(temp))
+
+	subary(0) = temp(0)
+	subary(1) = temp(0)
+	dest(0) = subary
+
+	n = 0
+	m = 1
+	do
+		for i = 1 to capacity
+			subary(0) = temp(m)
+			subary(1) = temp(n)
+			dest(m) = subary
+			m = m + 1
+		next
+		n = n + 1
+	loop until ubound(temp) < m
+
+	for i = 0 to ubound(temp)	' ２次シャッフル
+		m = int(rnd * (ubound(temp) + 1))
+		n = dest(i)
+		dest(i) = dest(m)
+		dest(m) = n
+	next
+end sub
+
+function recursive(ary, index, data, n)
+	if ary(n)(index)(0) < 0 then
+		recursive = ary(n)(data)
+	else
+		recursive = recursive(ary, index, data, ary(n)(index)(0)) & "/" & ary(n)(data)
+	end if
+end function
+
+dim objDict, ary(), s, i, j
+if wscript.arguments.count < 2 then
+	redim ary(3)
+	ary(0) = split("2,mid1,1", ",")
+	ary(1) = split("0,root,2", ",")
+	ary(2) = split("4,bottom,3", ",")
+	ary(3) = split("2,mid2,4", ",")
+	set objDict = create_tree(ary, 2, 0)
+
+	for i = 0 to ubound(ary)
+		wscript.echo ary(i)(2) & " : " & recursive(ary, 0, 1, i) & ""
+	next
+else
+	create_data ary, cint(wscript.arguments(0)), cint(wscript.arguments(1))
+	set objDict = create_tree(ary, 0, 1)
+
+	for i = 0 to ubound(ary)
+		s = ary(i)(0)
+		for j = 0 to ubound(ary(i)(1))
+			s = s & "," & ary(i)(1)(j)
+		next
+		s = s & ",<" & recursive(ary, 1, 0, i) & ">"
+		wscript.echo s
+	next
+end if
+</script>
+</job>
